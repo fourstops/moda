@@ -29,7 +29,7 @@ pip install adafruit-circuitpython-sgp40
 pip install adafruit-circuitpython-bme680
 ```
 
-*   **pzem016\_exporter module**
+*   **pzem-exporter module**
 
 ```bash
 cd  ~/moda
@@ -47,7 +47,7 @@ sudo systemctl enable pzem-exporter
 
 ```
 
-*   **sds011\_exporter module**
+*   **sds011-exporter module**
 
 ```bash
 cd  ~/moda
@@ -65,7 +65,7 @@ sudo systemctl enable sds011-exporter
 ```
 <br>
 
-*   **moda\_exporter module**
+*   **stemma-exporter module**
 
 ```bash
 cd  ~/moda

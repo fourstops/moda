@@ -5,8 +5,8 @@ After=network.target
 [Service]
 User=pi
 Group=pi
-WorkingDirectory=/usr/src/sds011_exporter
-ExecStart=sudo python3 /usr/src/sds011_exporter/sds011_exporter.py --bind=0.0.0.0 --port=8001
+WorkingDirectory=/usr/src/sds011-exporter
+ExecStart=sudo python3 /usr/src/sds011_exporter/sds011-exporter.py --bind=0.0.0.0 --port=8001
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]

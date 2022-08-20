@@ -51,10 +51,10 @@ sudo systemctl enable pzem-exporter
 
 ```bash
 cd  ~/moda
-sudo cp -r sds011_exporter /usr/src/
-sudo chown -R pi:pi /usr/src/sds011_exporter
+sudo cp -r sds011-exporter /usr/src/
+sudo chown -R pi:pi /usr/src/sds011-exporter
 
-cd /usr/src/sds011_exporter
+cd /usr/src/sds011-exporter
 sudo cp ~/moda/services/sds011-exporter.service /etc/systemd/system/sds011-exporter.service
 sudo chmod 644 /etc/systemd/system/sds011-exporter.service
 
@@ -69,10 +69,10 @@ sudo systemctl enable sds011-exporter
 
 ```bash
 cd  ~/moda
-sudo cp -r stemma_exporter /usr/src/
-sudo chown -R pi:pi /usr/src/stemma_exporter
+sudo cp -r stemma-exporter /usr/src/
+sudo chown -R pi:pi /usr/src/stemma-exporter
 
-cd /usr/src/stemma_exporter
+cd /usr/src/stemma-exporter
 sudo cp ~/moda/services/stemma-exporter.service /etc/systemd/system/stemma-exporter.service
 sudo chmod 644 /etc/systemd/system/stemma-exporter.service
 

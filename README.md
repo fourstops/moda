@@ -69,10 +69,10 @@ sudo systemctl enable sds011-exporter
 
 ```bash
 cd  ~/moda
-sudo cp -r moda_exporter /usr/src/
+sudo cp -r stemma_exporter /usr/src/
 sudo chown -R pi:pi /usr/src/stemma_exporter
 
-cd /usr/src/moda_exporter
+cd /usr/src/stemma_exporter
 sudo cp ~/moda/services/stemma-exporter.service /etc/systemd/system/stemma-exporter.service
 sudo chmod 644 /etc/systemd/system/stemma-exporter.service
 

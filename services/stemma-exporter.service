@@ -1,0 +1,13 @@
+[Unit]
+Description=stemma-exporter service
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/usr/src/stemma_exporter
+ExecStart=python3 /usr/src/stemma_exporter/stemma_exporter.py --bind=0.0.0.0 --port=8000
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

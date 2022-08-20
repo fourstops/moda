@@ -1,0 +1,16 @@
+[Unit]
+Description=Prometheus exporter for adafruit apds9960 light sensor
+Documentation=https://github.com/fourstops/apds9960_exporter
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+SyslogIdentifier=apds9960_exporter
+WorkingDirectory=/opt/apds9960_exporter
+ExecStart=python3 apds9960_exporter.py  
+KillSignal=SIGINT
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

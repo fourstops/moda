@@ -30,7 +30,7 @@ DEFAULT_PASSWORD = None
 # mqtt callbacks
 def on_connect(client, userdata, flags, rc):
 	if rc == 0:
-		print("connected OK")
+		print("MQTT Broker - Connected OK")
 	else:
 		print("Bad connection Returned code=", rc)
 

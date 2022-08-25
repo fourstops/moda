@@ -1,20 +1,21 @@
 ## moda
 
-*a Prometheus exporter variety pack*
+_a Prometheus exporter variety pack_
 <br>
 <br>
 
-   Sensor   | Metric                                                                             
+|   Sensor   | Metric                                                                               |
 | :--------: | :----------------------------------------------------------------------------------- |
-| *CCS811*  | Total Volatile Organic Compounds (TVOCs), including equivalent carbon dioxide (eCO2)  |
-|  *BME680*  | Temperature, Relative Humidity. Pressure, VOCs                                       |
-| *PZEM-016* | AC Volts, Amps, Watts, kWh, Hertz, Power Factor                                      |
-|  *SDS011*  | PM2.5, PM10                                                                          |
-<br>
+|  _CCS811_  | Total Volatile Organic Compounds (TVOCs), including equivalent carbon dioxide (eCO2) |
+|  _BME680_  | Temperature, Relative Humidity. Pressure, VOCs                                       |
+| _PZEM-016_ | AC Volts, Amps, Watts, kWh, Hertz, Power Factor                                      |
+|  _SDS011_  | PM2.5, PM10                                                                          |
+
+€<br>
 <br>
 
+- **_Dependencies_**
 
-*   ***Dependencies***
 ```bash
 git clone https://github.com/fourstops/moda
 cd moda
@@ -29,7 +30,7 @@ pip install adafruit-circuitpython-sgp40
 pip install adafruit-circuitpython-bme680
 ```
 
-*   **pzem-exporter module**
+- **pzem-exporter module**
 
 ```bash
 cd  ~/moda
@@ -47,7 +48,7 @@ sudo systemctl enable pzem-exporter
 
 ```
 
-*   **sds011-exporter module**
+- **sds011-exporter module**
 
 ```bash
 cd  ~/moda
@@ -63,9 +64,10 @@ sudo systemctl start sds011-exporter
 sudo systemctl status sds011-exporter
 sudo systemctl enable sds011-exporter
 ```
+
 <br>
 
-*   **stemma-exporter module**
+- **stemma-exporter module**
 
 ```bash
 cd  ~/moda

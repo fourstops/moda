@@ -50,8 +50,8 @@ DEBUG = os.getenv('DEBUG', 'false') == 'true'
 
 pzem = PZEM_016("/dev/ttyUSB0")  # Replace with the correct pa>
 
-VOLTAGE = Gauge('voltage','Voltage measured (V)')
-CURRENT = Gauge('current','Current measured in amps (A)')
+VOLTS = Gauge('volts','Volts measured (V)')
+AMPS = Gauge('amps','Amps measured in amps (A)')
 WATTS = Gauge ('watts','Power measured (W)')
 ENERGY = Gauge ('energy','Energy consumption measured (W-hr)')
 FREQUENCY = Gauge ('frequency','AC frequency measured (Hz)')
@@ -60,16 +60,16 @@ ALARM = Gauge ('alarm', 'alarm status (boolean)')
 
 def get_readings():
 	reading = pzem.read()
-	voltage = "Voltage", reading["voltage"]
-	current = "Current", reading["current"]
+	volts = "Volts", reading["volts"]
+	amps = "Amps", reading["amps"]
 	watts = "Watts", reading["watts"]
 	energy = "Energy", reading["energy"]
 	frequency = "Frequency", reading["frequency"]
 	power_factor = "Power_Factor", reading["power_factor"]
 	alarm_status = "Alarm_Status", reading["alarm_status"]
 
-	VOLTAGE.set(reading["voltage"])
-	CURRENT.set(reading["current"])
+	VOLTS.set(reading["volts"])
+	AMPS.set(reading["amps"])
 	WATTS.set(reading["watts"])
 	ENERGY.set(reading["energy"])
 	FREQUENCY.set(reading["frequency"])
@@ -78,10 +78,10 @@ def get_readings():
 	return reading
 
 def collect_all_data():
-	"""Collects all the data currently set"""
+	"""Collects all the data ampsly set"""
 	sensor_data = {}
-	sensor_data['voltage'] = VOLTAGE.collect()[0].samples[0].value
-	sensor_data['current'] = CURRENT.collect()[0].samples[0].value
+	sensor_data['volts'] = VOLTS.collect()[0].samples[0].value
+	sensor_data['amps'] = AMPS.collect()[0].samples[0].value
 	sensor_data['watts'] = WATTS.collect()[0].samples[0].value
 	sensor_data['energy'] = ENERGY.collect()[0].samples[0].value
 	sensor_data['frequency'] = FREQUENCY.collect()[0].samples[0].value

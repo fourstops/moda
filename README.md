@@ -24,6 +24,8 @@ pip install prometheus-client
 pip install paho-mqtt
 pip install python-pzem
 pip install py-sds011
+pip install minimalmodbus
+pip install smbus2
 pip install aqipy
 pip install adafruit-circuitpython-ccs811
 pip install adafruit-circuitpython-sgp40

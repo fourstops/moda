@@ -17,7 +17,7 @@ elapsed_sec = 0
 
 parser = argparse.ArgumentParser(description="Prometheus exporter for sgp30 air quality sensor")
 parser.add_argument('--listen', action='store', default='0.0.0.0', help='bind to address, default: 0.0.0.0')
-parser.add_argument('--port', action='store', type=int, default=8000, help='bind to port, default: 8002')
+parser.add_argument('--port', action='store', type=int, default=8030, help='bind to port, default: 8030')
 parser.add_argument('--polling_interval', action='store', type=int, default=3, help='sensor polling interval, seconds, default: 1')
 parser.add_argument('--verbose', action="store_true", help='print every poll result to stdout')
 

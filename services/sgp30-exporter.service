@@ -6,7 +6,7 @@ After=network.target
 User=pi
 Group=pi
 WorkingDirectory=/usr/src/sgp30_exporter
-ExecStart=/usr/bin/python3 /usr/src/sgp30_exporter/sgp30_exporter.py --verbose
+ExecStart=python3 /usr/src/sgp30_exporter/sgp30_exporter.py --verbose
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]

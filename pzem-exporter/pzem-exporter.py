@@ -194,7 +194,9 @@ if __name__ == "__main__":
 	mqtt_client.loop_start()
 
 	while True:
-		mqtt_client.publish(args.topic, json.dumps(collect_all_data()))
+		prefix = json.dumps(collect_all_data())
+		topic = prefix.strip("/") + "/" + topic
+		mqtt_client.publish(args.topic, str(value)))
 		get_readings()
 		if DEBUG:
 			logging.info('Sensor data: {}'.format(collect_all_data()))

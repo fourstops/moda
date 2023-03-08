@@ -6,6 +6,7 @@ import time
 import logging
 import argparse
 import subprocess
+import aqi
 from threading import Thread
 
 from prometheus_client import start_http_server, Gauge, Histogram
@@ -60,6 +61,7 @@ PROXIMITY = Gauge('proximity', 'proximity, with larger numbers being closer prox
 PM1 = Gauge('PM1', 'Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)')
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
+AQI = Gauge('AQI', 'AQI value')
 
 OXIDISING_HIST = Histogram('oxidising_measurements', 'Histogram of oxidising measurements', buckets=(0, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 100000))
 REDUCING_HIST = Histogram('reducing_measurements', 'Histogram of reducing measurements', buckets=(0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000, 1500000))
@@ -165,6 +167,9 @@ def get_particulates():
     """Get the particulate matter readings"""
     try:
         pms_data = pms5003.read()
+        current_pm25 = pms_data.pm_ug_per_m3(2.5)
+        current_pm10 = pms_data.pm_ug_per_m3(10)
+        current_aqi = aqi.to_aqi([(aqi.POLLUTANT_PM25, current_pm25), (aqi.POLLUTANT_PM10, current_pm10)])
     except pmsReadTimeoutError:
         logging.warning("Failed to read PMS5003")
     except IOError:
@@ -174,6 +179,7 @@ def get_particulates():
         PM1.set(pms_data.pm_ug_per_m3(1.0))
         PM25.set(pms_data.pm_ug_per_m3(2.5))
         PM10.set(pms_data.pm_ug_per_m3(10))
+        AQI.set(current_aqi)
 
         PM1_HIST.observe(pms_data.pm_ug_per_m3(1.0))
         PM25_HIST.observe(pms_data.pm_ug_per_m3(2.5) - pms_data.pm_ug_per_m3(1.0))
@@ -193,6 +199,7 @@ def collect_all_data():
     sensor_data['pm1'] = PM1.collect()[0].samples[0].value
     sensor_data['pm25'] = PM25.collect()[0].samples[0].value
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
+    sensor_data['aqi'] = AQI.collect()[0].samples[0].value
     return sensor_data
 
 def post_to_influxdb():

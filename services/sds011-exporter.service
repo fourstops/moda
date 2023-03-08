@@ -6,7 +6,7 @@ After=network.target
 User=pi
 Group=pi
 WorkingDirectory=/usr/src/sds011-exporter
-ExecStart=sudo python3 /usr/src/sds011_exporter/sds011-exporter.py --bind=0.0.0.0 --port=8001
+ExecStart=sudo python3 /usr/src/sds011-exporter/sds011-exporter.py --bind=0.0.0.0 --port=8001
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]

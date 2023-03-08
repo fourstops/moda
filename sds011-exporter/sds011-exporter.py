@@ -10,8 +10,8 @@ from collections import deque
 import paho.mqtt.publish
 from prometheus_client import start_http_server, Gauge, Histogram
 
-from aqipy import aqi_cn, aqi_us, caqi_eu
 from sds011 import SDS011
+import aqi
 
 logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s',
@@ -48,20 +48,11 @@ def parse_args():
 
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
+AQI = Gauge('AQI', 'AQI value')
+AQIc = Gauge('AQIc', 'AQIc value')
 
 PM25_HIST = Histogram('pm25_measurements', 'Histogram of Particulate Matter of diameter less than 2.5 micron measurements', buckets=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100))
 PM10_HIST = Histogram('pm10_measurements', 'Histogram of Particulate Matter of diameter less than 10 micron measurements', buckets=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100))
-
-def get_aqi_interval(country):
-    # ISO_3166-1 country codes
-    if country in ("US"):
-        # 24 hours
-        return 86400
-    elif country in ("EU"):
-        # 1 hour
-        return 3600
-    else:
-        return -1
 
 def get_data(sensor, measures, start_delay, operation_delay):
     # Wake-up sensor
@@ -83,6 +74,8 @@ def get_data(sensor, measures, start_delay, operation_delay):
     # Round the measures as a number with one decimal
     current_pm25 = round(current_pm25/measures, 1)
     current_pm10 = round(current_pm10/measures, 1)
+    current_aqi = aqi.to_iaqi(aqi.POLLUTANT_PM25, current_pm25, algo=aqi.ALGO_EPA)
+    current_aqic = aqi.to_aqi([(aqi.POLLUTANT_PM25, current_pm25), (aqi.POLLUTANT_PM10, current_pm10)])
 
     # Put the sensor to sleep
     sensor.sleep(sleep=True)
@@ -90,69 +83,13 @@ def get_data(sensor, measures, start_delay, operation_delay):
 
     PM25.set(current_pm25)
     PM10.set(current_pm10)
+    AQI.set(current_aqi)
+    AQIc.set(current_aqic)
 
     PM25_HIST.observe(current_pm25)
     PM10_HIST.observe(current_pm10 - current_pm25)
 
-    return current_pm25, current_pm10
-
-def compute_aqi(pm25, pm10, country):
-    # AQI index
-    current_aqi = -1
-    # AQI index associated data
-    current_aqi_data = {}
-    # AQI index level
-    current_aqi_level = ""
-
-    # ISO_3166-1 country codes
-    if country == "CN":
-        current_aqi, current_aqi_data = aqi_cn.get_aqi(pm25_24h=pm25, pm10_24h=pm10)
-        current_aqi, current_aqi_level = aqi_cn.get_aqi(pm25_24h=pm25, pm10_24h=pm10, with_level=True)
-    elif country == "EU":
-        current_aqi, current_aqi_data = caqi_eu.get_caqi(pm25_1h=pm25, pm10_1h=pm10)
-        current_aqi, current_aqi_level = caqi_eu.get_caqi(pm25_1h=pm25, pm10_1h=pm10, with_level=True)
-
-    return current_aqi, current_aqi_data, current_aqi_level
-
-def get_aqi_color(aqi_level, country):
-    if country == "CN":
-        if aqi_level == "excellent":
-            # Green : 0 < aqi <= 50
-            return "0 255 0"
-        elif aqi_level == "good":
-            # Yellow : 51 < aqi <= 100
-            return "255 255 0"
-        elif aqi_level == "lightly polluted":
-            # Orange : 100 < aqi <= 150
-            return "255 153 0"
-        elif aqi_level == "moderately polluted":
-            # Red : 150 < aqi <= 200
-            return "255 0 0"
-        elif aqi_level == "heavily polluted":
-            # Indigo : 200 < aqi <= 300
-            return "84 0 153"
-        elif aqi_level == "severely polluted":
-            # Maroon : 300 < aqi
-            return "128 0 0"
-    elif country == "EU":
-        if aqi_level == "very low":
-            # Green : 0 < aqi <= 25
-            return "0 255 0"
-        elif aqi_level == "low":
-            # Yellow-Green : 26 < aqi <= 50
-            return "163 255 15"
-        elif aqi_level == "medium":
-            # Yellow : 51 < aqi <= 75
-            return "255 255 0"
-        elif aqi_level == "high":
-            # Orange : 76 < aqi <= 100
-            return "255 153 0"
-        elif aqi_level == "very high":
-            # Red : 101 < aqi
-            return "255 0 0"
-        pass
-    else:
-        return ""
+    return current_pm25, current_pm10, current_aqi, current_aqic
 
 def set_turris_omnia_led(user1_color, user2_color):
     if user1_color != "":
@@ -191,6 +128,9 @@ def collect_all_data():
     sensor_data = {}
     sensor_data['pm25'] = PM25.collect()[0].samples[0].value
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
+    sensor_data['aqi'] = AQI.collect()[0].samples[0].value
+    sensor_data['aqic'] = AQIc.collect()[0].samples[0].value
+
     return sensor_data
 
 def str_to_bool(value):
@@ -203,19 +143,6 @@ def str_to_bool(value):
 args = parse_args()
 sensor = SDS011(args.sensor)
 
-# Time interval (in seconds) used to compute AQI values, differs by country.
-# Usually 1, 3 or 24 hours
-aqi_interval = get_aqi_interval(args.country)
-# Number of measures to take in the AQI time interval, according to --delay
-num_measures = aqi_interval // args.delay
-
-# If --delay > 1 AQI time interval, keep one measure instead of zero
-if num_measures <= 0:
-    num_measures = 1
-
-# Create a PM2.5 and PM10 deques to store enough measures for the AQI time interval
-dequeue_pm25 = deque(maxlen=num_measures)
-dequeue_pm10 = deque(maxlen=num_measures)
 
 # Start up the server to expose the metrics.
 start_http_server(addr=args.bind, port=args.port)
@@ -226,17 +153,7 @@ logging.info("Listening on http://{}:{}".format(args.bind, args.port))
 
 while(True):
     # Retrieve current PM2.5 and PM10 values from the sensor
-    current_pm25, current_pm10 = get_data(sensor, args.measures, args.sensor_start_delay, args.sensor_operation_delay)
-
-    # Append current PM2.5 and PM10 values do their respective deques,
-    # discarding the oldest value if the deque if full 
-    dequeue_pm25.append(current_pm25)
-    dequeue_pm10.append(current_pm10)
-
-    average_pm25 = sum(dequeue_pm25) / len(dequeue_pm25)
-    average_pm10 = sum(dequeue_pm10) / len(dequeue_pm10)
-
-    aqi, aqi_data, aqi_level = compute_aqi(average_pm25, average_pm10, args.country)
+    current_pm25, current_pm10, current_aqi, current_aqic = get_data(sensor, args.measures, args.sensor_start_delay, args.sensor_operation_delay)
 
     # Set Turris Omnia User #1 and #2 LED colors
     if args.omnia_leds is True:

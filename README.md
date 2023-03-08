@@ -11,26 +11,14 @@ _a Prometheus exporter variety pack_
 | _PZEM-016_ | AC Volts, Amps, Watts, kWh, Hertz, Power Factor                                      |
 |  _SDS011_  | PM2.5, PM10                                                                          |
 
-€<br>
 <br>
 
 - **_Dependencies_**
-
 ```bash
-git clone https://github.com/fourstops/moda
-cd moda
 
-pip install prometheus-client
-pip install paho-mqtt
-pip install python-pzem
-pip install py-sds011
-pip install minimalmodbus
-pip install smbus2
-pip install aqipy
-pip install adafruit-circuitpython-ccs811
-pip install adafruit-circuitpython-sgp40
-pip install adafruit-circuitpython-bme680
+sudo pip install prometheus-client paho-mqtt python-pzem py-sds011 minimalmodbus smbus2 python-aqi adafruit-circuitpython-ccs811 adafruit-circuitpython-sgp40 adafruit-circuitpython-bme680
 ```
+<br>
 
 - **pzem-exporter module**
 

@@ -49,7 +49,6 @@ def parse_args():
 PM25 = Gauge('PM25', 'Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)')
 PM10 = Gauge('PM10', 'Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)')
 AQI = Gauge('AQI', 'AQI value')
-AQIc = Gauge('AQIc', 'AQIc value')
 
 PM25_HIST = Histogram('pm25_measurements', 'Histogram of Particulate Matter of diameter less than 2.5 micron measurements', buckets=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100))
 PM10_HIST = Histogram('pm10_measurements', 'Histogram of Particulate Matter of diameter less than 10 micron measurements', buckets=(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100))
@@ -74,8 +73,7 @@ def get_data(sensor, measures, start_delay, operation_delay):
     # Round the measures as a number with one decimal
     current_pm25 = round(current_pm25/measures, 1)
     current_pm10 = round(current_pm10/measures, 1)
-    current_aqi = aqi.to_iaqi(aqi.POLLUTANT_PM25, current_pm25, algo=aqi.ALGO_EPA)
-    current_aqic = aqi.to_aqi([(aqi.POLLUTANT_PM25, current_pm25), (aqi.POLLUTANT_PM10, current_pm10)])
+    current_aqi = aqi.to_aqi([(aqi.POLLUTANT_PM25, current_pm25), (aqi.POLLUTANT_PM10, current_pm10)])
 
     # Put the sensor to sleep
     sensor.sleep(sleep=True)
@@ -84,12 +82,11 @@ def get_data(sensor, measures, start_delay, operation_delay):
     PM25.set(current_pm25)
     PM10.set(current_pm10)
     AQI.set(current_aqi)
-    AQIc.set(current_aqic)
 
     PM25_HIST.observe(current_pm25)
     PM10_HIST.observe(current_pm10 - current_pm25)
 
-    return current_pm25, current_pm10, current_aqi, current_aqic
+    return current_pm25, current_pm10, current_aqi
 
 def set_turris_omnia_led(user1_color, user2_color):
     if user1_color != "":
@@ -129,7 +126,6 @@ def collect_all_data():
     sensor_data['pm25'] = PM25.collect()[0].samples[0].value
     sensor_data['pm10'] = PM10.collect()[0].samples[0].value
     sensor_data['aqi'] = AQI.collect()[0].samples[0].value
-    sensor_data['aqic'] = AQIc.collect()[0].samples[0].value
 
     return sensor_data
 
@@ -153,7 +149,7 @@ logging.info("Listening on http://{}:{}".format(args.bind, args.port))
 
 while(True):
     # Retrieve current PM2.5 and PM10 values from the sensor
-    current_pm25, current_pm10, current_aqi, current_aqic = get_data(sensor, args.measures, args.sensor_start_delay, args.sensor_operation_delay)
+    current_pm25, current_pm10, current_aqi = get_data(sensor, args.measures, args.sensor_start_delay, args.sensor_operation_delay)
 
     # Set Turris Omnia User #1 and #2 LED colors
     if args.omnia_leds is True:
